@@ -3,6 +3,7 @@ import os
 
 class ProsperConfig:
     def __init__(self):
+        self.run_mode = os.environ.get("RUN_MODE", "test")
         self.client_id = os.environ.get("PROSPER_CLIENT_ID")
         self.client_secret = os.environ.get("PROSPER_CLIENT_SECRET")
         self.username = os.environ.get("PROSPER_USERNAME")
