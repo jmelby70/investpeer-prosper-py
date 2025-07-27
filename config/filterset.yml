@@ -10,13 +10,13 @@ filter-set-list:
     inquiries_under: 0
     delinquencies_under: 0
     payment_income_ratio_under: 0.11
-    loan_count_over: 1 #4
+    loan_count_over: 4
   - grades: B,C,D,E
     employment_length_over: 0
     inquiries_under: 1
     delinquencies_under: 1
     payment_income_ratio_under: 0.12
-    loan_count_over: 1 #8
+    loan_count_over: 8
   - grades: AA,A,B,C,D,E
     employment_length_over: 0
     inquiries_under: 2
