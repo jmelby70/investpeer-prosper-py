@@ -13,7 +13,7 @@ from service.prosper_notes_service import ProsperNotesService
 @functions_framework.cloud_event
 def receive_message_function(cloud_event):
     logger.info(f"Message Received: {cloud_event.data}")
-    logger.info("Run mode: " + os.environ.get("RUN_MODE", "test"))
+    logger.info("Run mode: " + prosper_config.run_mode)
     try:
         prosper_notes_service.buy_notes()
     except Exception as e:
