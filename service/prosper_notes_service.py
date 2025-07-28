@@ -80,7 +80,7 @@ class ProsperNotesService:
             self.logger.debug(f"Account information: {json.dumps(asdict(account), indent=4)}")
             available_cash = account.available_cash_balance
             self.logger.info(f"Available cash balance: {available_cash}")
-            if self.prosper_config.run_mode == "test" or available_cash >= self.prosper_config.min_investment_amount:
+            if self.prosper_config.run_mode == "test" or available_cash >= self.prosper_config.minimum_investment_amount:
                 self.logger.info("Getting listings...")
                 listings = prosper_rest_service.get_listings()
                 self.logger.info(f"Total listings retrieved: {len(listings.result)}")
