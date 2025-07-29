@@ -1,9 +1,9 @@
 import json
 import logging
+import traceback
 from dataclasses import asdict
 
 from model.filterset import *
-from model.orders import OrdersRequest, BidRequest
 from service.notification_service import NotificationService
 from service.prosper_rest_service import ProsperRestService
 
@@ -60,14 +60,15 @@ class ProsperNotesService:
         return trimmed_listings
 
     def create_order_request(self, listings, max_loan_count):
-        orders_request = OrdersRequest()
-        bid_requests = []
+        orders_request = dict()
+        bid_requests = list()
+        order_ids = list()
         for i, listing in enumerate(list(listings)[:min(max_loan_count, 100)]):
-            bid_request = BidRequest()
-            bid_request.bid_amount = self.prosper_config.minimum_investment_amount
-            bid_request.listing_id = listing.listing_number
-            bid_requests.append(bid_request)
-        orders_request.bid_requests = bid_requests
+            if listing.listing_number not in order_ids:
+                order_ids.append(listing.listing_number)
+                bid_request = {"listing_id": listing.listing_number, "bid_amount": self.prosper_config.minimum_investment_amount}
+                bid_requests.append(bid_request)
+        orders_request.update({"bid_requests": bid_requests})
         self.logger.info(f"Created OrdersRequest: {orders_request}")
         return orders_request
 
@@ -130,5 +131,6 @@ class ProsperNotesService:
 
         except Exception as e:
             self.logger.error(f"Error retrieving listings: {e}")
+            self.notification_service.send_error_notification(traceback.format_exc())
             raise e
         return
