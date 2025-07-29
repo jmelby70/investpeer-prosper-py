@@ -1,10 +1,9 @@
 # service/prosper_rest_service.py
-import json
 
 import requests
 import logging
 from dacite import from_dict, Config
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 
 from model.account import Account
 from model.listings import Listings
@@ -129,15 +128,14 @@ class ProsperRestService:
     def submit_order(self, orders_request):
         url = f"{self.get_base_url()}/v1/orders/"
         headers = self.get_http_headers()
-        data = json.dumps(asdict(orders_request))
-        response = requests.post(url, headers=headers, json=data)
+        response = requests.post(url, headers=headers, json=orders_request)
         if response.status_code in (401, 403):
             self.logger.info("Expired access token detected, re-initializing token...")
             self.init_token()
             headers = self.get_http_headers()
-            response = requests.post(url, headers=headers, json=data)
+            response = requests.post(url, headers=headers, json=orders_request)
         if not response.ok:
             self.logger.error(f"Error submitting order: {response.status_code}, Response: {response.text}")
-            self.logger.debug(f"Request data: {data}")
+            self.logger.debug(f"Request data: {orders_request}")
             raise Exception(f"Error submitting order: {response.status_code}")
         return from_dict(data_class=OrdersResponse, data=response.json(), config=Config(strict=False))
