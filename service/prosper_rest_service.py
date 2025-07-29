@@ -1,4 +1,5 @@
 # service/prosper_rest_service.py
+import json
 
 import requests
 import logging
@@ -128,7 +129,7 @@ class ProsperRestService:
     def submit_order(self, orders_request):
         url = f"{self.get_base_url()}/v1/orders/"
         headers = self.get_http_headers()
-        data = asdict(orders_request)
+        data = json.dumps(asdict(orders_request))
         response = requests.post(url, headers=headers, json=data)
         if response.status_code in (401, 403):
             self.logger.info("Expired access token detected, re-initializing token...")
@@ -136,5 +137,7 @@ class ProsperRestService:
             headers = self.get_http_headers()
             response = requests.post(url, headers=headers, json=data)
         if not response.ok:
+            self.logger.error(f"Error submitting order: {response.status_code}, Response: {response.text}")
+            self.logger.debug(f"Request data: {data}")
             raise Exception(f"Error submitting order: {response.status_code}")
         return from_dict(data_class=OrdersResponse, data=response.json(), config=Config(strict=False))
