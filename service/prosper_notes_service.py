@@ -56,7 +56,7 @@ class ProsperNotesService:
             # Truncate if more than max_loan_count
             if len(trimmed_listings) > max_loan_count:
                 self.logger.info(f"Truncating order to max listing count of {max_loan_count}")
-                trimmed_listings = set(list(trimmed_listings)[:max_loan_count])
+                trimmed_listings = list(list(trimmed_listings)[:max_loan_count])
         return trimmed_listings
 
     def create_order_request(self, listings, max_loan_count):
