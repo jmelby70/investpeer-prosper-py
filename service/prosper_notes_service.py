@@ -73,17 +73,16 @@ class ProsperNotesService:
         return orders_request
 
     def buy_notes(self):
-        prosper_rest_service = ProsperRestService(self.prosper_config)
         try:
             # Determine how much cash is available to invest
             self.logger.info("Retrieving account information...")
-            account = prosper_rest_service.get_account()
+            account = self.prosper_rest_service.get_account()
             self.logger.debug(f"Account information: {json.dumps(asdict(account), indent=4)}")
             available_cash = account.available_cash_balance
             self.logger.info(f"Available cash balance: {available_cash}")
             if self.prosper_config.run_mode == "test" or available_cash >= self.prosper_config.minimum_investment_amount:
                 self.logger.info("Getting listings...")
-                listings = prosper_rest_service.get_listings()
+                listings = self.prosper_rest_service.get_listings()
                 self.logger.info(f"Total listings retrieved: {len(listings.result)}")
                 if listings.result_count > 0:
                     self.logger.debug(f"Listings: {json.dumps([asdict(listing) for listing in listings.result], indent=4)}")
@@ -108,14 +107,14 @@ class ProsperNotesService:
                             self.logger.debug(f"Trimmed listings: {json.dumps([asdict(listing) for listing in trimmed_listings], indent=4)}")
                             orders_request = self.create_order_request(trimmed_listings, max_loan_count)
                             self.logger.info(f"Submitting order request: {orders_request}")
-                            response = prosper_rest_service.submit_order(orders_request)
+                            response = self.prosper_rest_service.submit_order(orders_request)
                             self.logger.info(f"Order submitted: {response.order_id}")
-                            self.notification_service.send_order_notification(trimmed_listings, response)
+                            self.notification_service.send_order_notification(account, trimmed_listings, response)
 
                         elif trimmed_listings and len(trimmed_listings) > 0 and self.prosper_config.run_mode == "test":
                             self.logger.info("Test mode, not submitting order. Trimmed listings:")
                             self.logger.debug(f"Trimmed listings: {json.dumps([asdict(listing) for listing in trimmed_listings], indent=4)}")
-                            self.notification_service.send_order_notification(trimmed_listings, None)
+                            self.notification_service.send_order_notification(account, trimmed_listings, None)
 
                         else:
                             self.logger.info("No listings available after trimming, skipping buy_notes.")
@@ -134,3 +133,7 @@ class ProsperNotesService:
             self.notification_service.send_error_notification(traceback.format_exc())
             raise e
         return
+
+    def account_summary(self):
+        account = self.prosper_rest_service.get_account()
+        self.notification_service.send_account_summary_notification(account)
