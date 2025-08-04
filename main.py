@@ -18,7 +18,7 @@ from service.prosper_notes_service import ProsperNotesService
 @functions_framework.cloud_event
 def receive_message_function(cloud_event):
     logger.info(f"Cloud Event Received: {cloud_event}")
-    event_type = get_and_decode_data_data(cloud_event.data)
+    event_type = get_and_decode_data_data(cloud_event)
     logger.info(f"Event Type: {event_type}")
     logger.info("Run mode: " + prosper_config.run_mode)
     try:
@@ -44,11 +44,13 @@ def load_filterset_properties(yaml_path: str) -> FilterSetProperties:
     return FilterSetProperties(filter_set_list=filter_set_list)
 
 
-def get_and_decode_data_data(message: dict):
+def get_and_decode_data_data(event):
     try:
-        data_field = message["data"]
+        logger.debug(f"Event is of type: {type(event)}")
+        logger.debug(f"Event data: {event.get_data()}")
+        data_field = event.get_data()["message"]["data"]
+
         logger.debug(f"Data field found in message: {data_field}")
-        logger.debug(f"Encoded data: {data_field}")
         decoded = base64.b64decode(data_field, validate=True)
         logger.debug(f"Decoded data: {decoded}")
         return decoded.decode("utf-8")
@@ -60,7 +62,9 @@ def get_and_decode_data_data(message: dict):
 
 # Configure logging
 log_level = os.environ.get("LOG_LEVEL", "INFO").upper()
+print(f"Setting log level to: {log_level}")
 logging.basicConfig(level=getattr(logging, log_level, logging.INFO))
+print(f"Logging configured with level: {log_level}")
 
 if os.environ.get("K_SERVICE"):
     from google.cloud import logging as cloud_logging
