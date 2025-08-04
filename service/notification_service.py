@@ -92,5 +92,5 @@ class NotificationService:
         sb.append("\nInvested Note Grades:")
         sb.append("-" * 40)
         for note_grade, amount in account.invested_notes.items():
-            sb.append(f"({note_grade}):{'':12} ${amount:>12,.2f}")
+            sb.append(f"{note_grade}:{'':12} ${amount:>12,.2f}")
         return "\n".join(sb)
