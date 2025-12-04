@@ -3,7 +3,10 @@ import os
 
 class ProsperConfig:
     def __init__(self):
+        self.project_id = os.environ.get('GOOGLE_CLOUD_PROJECT')
         self.run_mode = os.environ.get("RUN_MODE", "test")
+        self.dataset_name = os.environ.get("PROSPER_DATASET_NAME", "prosper")
+        self.notes_table_name = os.environ.get("PROSPER_NOTES_TABLE_NAME", "notes")
         self.client_id = os.environ.get("PROSPER_CLIENT_ID")
         self.client_secret = os.environ.get("PROSPER_CLIENT_SECRET")
         self.username = os.environ.get("PROSPER_USERNAME")

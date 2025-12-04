@@ -6,6 +6,7 @@ from dataclasses import asdict
 from model.filterset import *
 from service.notification_service import NotificationService
 from service.prosper_rest_service import ProsperRestService
+from service.biqquery_service import BigQueryService
 
 
 class ProsperNotesService:
@@ -137,3 +138,30 @@ class ProsperNotesService:
     def account_summary(self):
         account = self.prosper_rest_service.get_account()
         self.notification_service.send_account_summary_notification(account)
+
+    def load_historical_notes(self):
+        try:
+            # Create the notes table if it does not exist
+            bigquery_service = BigQueryService()
+            bigquery_service.create_notes_table(self.prosper_config)
+
+            # Retrieve notes from Prosper
+            self.logger.info("Retrieving notes...")
+            notes_response = self.prosper_rest_service.get_notes()
+
+            notes =notes_response.get("result")
+            self.logger.info(f"Total notes retrieved: {len(notes)}")
+            self.logger.debug(f"Notes: {json.dumps(notes, indent=4)}")
+
+            # Insert notes into BigQuery
+            if notes and len(notes) > 0:
+                bigquery_service.insert_notes(self.prosper_config, notes)
+            else:
+                self.logger.info("No notes available to insert.")
+                return
+
+        except Exception as e:
+            self.logger.error(f"Error loading historical notes: {e}")
+            self.notification_service.send_error_notification(traceback.format_exc())
+            raise e
+        return

@@ -84,16 +84,24 @@ class ProsperRestService:
         )
 
     def get_entity(self, url, data_class):
+        return from_dict(data_class=data_class, data=self.get_dict(url), config=Config(strict=False))
+
+    def get_dict(self, url):
         headers = self.get_http_headers()
+        self.logger.debug("Invoking GET service with URL: %s", url)
+        self.logger.debug("Request Headers: %s", headers)
         response = requests.get(url, headers=headers)
         if response.status_code in (401, 403):
             self.logger.info("Expired access token detected, re-initializing token...")
             self.init_token()
             headers = self.get_http_headers()
             response = requests.get(url, headers=headers)
+        self.logger.debug("Response Status Code: %s", response.status_code)
+        self.logger.debug("Response Headers: %s", response.headers)
+        self.logger.debug("Response Content: %s", response.text)
         if not response.ok:
-            raise Exception(f"Error retrieving {data_class.__name__}: {response.status_code}")
-        return from_dict(data_class=data_class, data=response.json(), config=Config(strict=False))
+            raise Exception(f"Error invoking GET {url}: {response.status_code}")
+        return response.json()
 
     def get_account(self):
         url = f"{self.get_base_url()}/v1/accounts/prosper"
@@ -139,3 +147,9 @@ class ProsperRestService:
             self.logger.debug(f"Request data: {orders_request}")
             raise Exception(f"Error submitting order: {response.status_code}")
         return from_dict(data_class=OrdersResponse, data=response.json(), config=Config(strict=False))
+
+    def get_notes(self, offset=0, limit=100):
+        # url = f"{self.get_base_url()}/v1/notes?offset={str(offset)}&limit={str(limit)}"
+        url = f"{self.get_base_url()}/v1/notes/?offset=0&limit=25"
+        self.logger.info("Invoking Notes service with URL: %s", url)
+        return self.get_dict(url)

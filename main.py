@@ -26,6 +26,8 @@ def receive_message_function(cloud_event):
             prosper_notes_service.buy_notes()
         elif event_type == "account_summary":
             prosper_notes_service.account_summary()
+        elif event_type == "load_historical_notes":
+            prosper_notes_service.load_historical_notes()
         else:
             logger.error(f"Unknown event type: {event_type}")
             raise ValueError(f"Unknown event type: {event_type}")
