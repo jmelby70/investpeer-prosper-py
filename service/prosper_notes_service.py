@@ -130,7 +130,6 @@ class ProsperNotesService:
 
         except Exception as e:
             self.logger.error(f"Error retrieving listings: {e}")
-            # self.notification_service.send_error_notification(traceback.format_exc())
             raise e
         return
 

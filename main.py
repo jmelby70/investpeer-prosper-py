@@ -31,7 +31,7 @@ def receive_message_function(cloud_event):
             raise ValueError(f"Unknown event type: {event_type}")
     except Exception as e:
         logger.error(f"Error processing {event_type} event: {e}")
-        notification_service.send_error_notification(traceback.format_exc())
+        # notification_service.send_error_notification(traceback.format_exc())
         raise e
     return
 
