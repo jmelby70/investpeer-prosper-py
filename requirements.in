@@ -1,0 +1,8 @@
+# Direct dependencies for investpeer-prosper-py
+functions-framework
+google-cloud-logging
+requests
+PyYAML
+dacite
+sendgrid
+python-http-client
